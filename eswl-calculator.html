@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESWL Success Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #F7F7F5;
+    --bg-card:     #FFFFFF;
+    --green:       #3B6D11;
+    --green-light: #EAF3DE;
+    --green-mid:   #639922;
+    --green-dark:  #27500A;
+    --text:        #1C1C1A;
+    --muted:       #5F5E5A;
+    --hint:        #888780;
+    --border:      rgba(0,0,0,0.09);
+    --border-md:   rgba(0,0,0,0.14);
+    --amber-bg:    #FFF8E6;
+    --amber-border:#EF9F27;
+    --amber-text:  #633806;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: rgba(247,247,245,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-title {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .nav-badge {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+  }
+
+  /* DISCLAIMER BANNER */
+  .disclaimer-banner {
+    background: var(--amber-bg);
+    border-bottom: 0.5px solid var(--amber-border);
+    padding: 10px 2.5rem;
+    font-size: 12px;
+    color: var(--amber-text);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 4rem;
+  }
+
+  /* HEADER */
+  .page-header { margin-bottom: 2.5rem; }
+  .page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+  }
+  .page-eyebrow::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green-mid);
+  }
+  .page-header h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+  .page-header h1 em { font-style: italic; color: var(--green-mid); }
+  .page-header p {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* MODEL STATS */
+  .model-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+  }
+  .stat-label { font-size: 11px; color: var(--hint); margin-bottom: 3px; }
+  .stat-value { font-size: 20px; font-weight: 500; color: var(--text); font-family: 'Lora', serif; }
+  .stat-sub { font-size: 11px; color: var(--hint); margin-top: 2px; }
+
+  /* CALCULATOR CARD */
+  .calc-card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .field-group-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--hint);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    margin: 1.5rem 0 0.875rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .field-group-label:first-child { margin-top: 0; }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .field input, .field select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 0.5px solid var(--border-md);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(99,153,34,0.1);
+  }
+  .field .unit { font-size: 11px; color: var(--hint); }
+
+  /* RESULT */
+  .result-box {
+    margin-top: 2rem;
+    background: var(--green-light);
+    border: 0.5px solid rgba(59,109,17,0.2);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+  }
+  .result-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .result-prob-group {}
+  .result-prob-label { font-size: 12px; color: var(--green); margin-bottom: 4px; letter-spacing: 0.02em; }
+  .result-prob {
+    font-family: 'Lora', serif;
+    font-size: 52px;
+    font-weight: 500;
+    color: var(--green-dark);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .result-right { text-align: right; }
+  .result-interp-label { font-size: 11px; color: var(--green); margin-bottom: 4px; }
+  .result-interp {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--green-dark);
+  }
+  .result-logodds { font-size: 11px; color: var(--green); margin-top: 4px; opacity: 0.8; }
+
+  .bar-bg {
+    height: 6px;
+    background: rgba(59,109,17,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--green-mid);
+    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .result-meta {
+    margin-top: 0.875rem;
+    font-size: 11px;
+    color: var(--green);
+    opacity: 0.65;
+  }
+
+  /* METHODS */
+  .methods {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .methods h2 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .methods p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+  .methods p:last-child { margin-bottom: 0; }
+  .coef-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 1rem; }
+  .coef-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--hint);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 6px 8px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .coef-table td {
+    padding: 7px 8px;
+    color: var(--muted);
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .coef-table tr:last-child td { border-bottom: none; }
+  .coef-table td:first-child { color: var(--text); }
+  .sig { color: var(--green-mid); font-weight: 500; }
+
+  /* DISCLAIMER CARD */
+  .disclaimer-card {
+    background: var(--amber-bg);
+    border: 0.5px solid var(--amber-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    font-size: 13px;
+    color: var(--amber-text);
+    line-height: 1.65;
+  }
+  .disclaimer-card strong { font-weight: 500; }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--hint);
+    max-width: 720px;
+    margin: 2rem auto 0;
+  }
+
+  @media (max-width: 580px) {
+    nav { padding: 0 1.25rem; }
+    .main { padding: 2rem 1.25rem 3rem; }
+    .disclaimer-banner { padding: 10px 1.25rem; }
+    .result-top { flex-direction: column; }
+    .result-right { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-title">ESWL success calculator</span>
+  <span class="nav-badge">Research tool</span>
+</nav>
+
+<div class="disclaimer-banner">
+  For research and educational use only. Not validated for clinical decision-making. Do not use to guide individual patient management.
+</div>
+
+<div class="main">
+
+  <div class="page-header">
+    <span class="page-eyebrow">Urology · predictive modelling</span>
+    <h1>ESWL success <em>probability</em></h1>
+    <p>Estimates the probability of successful stone fragmentation following extracorporeal shock wave lithotripsy (ESWL), based on pre-procedure clinical and radiological parameters.</p>
+  </div>
+
+  <div class="model-stats">
+    <div class="stat-card">
+      <div class="stat-label">Patients</div>
+      <div class="stat-value">343</div>
+      <div class="stat-sub">procedures</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">C-statistic</div>
+      <div class="stat-value">0.693</div>
+      <div class="stat-sub">bootstrap-corrected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Calibration</div>
+      <div class="stat-value">0.023</div>
+      <div class="stat-sub">mean abs. error</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Validation</div>
+      <div class="stat-value">1000×</div>
+      <div class="stat-sub">bootstrap</div>
+    </div>
+  </div>
+
+  <div class="calc-card">
+
+    <div class="field-group-label">Patient characteristics</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="age">Age</label>
+        <input type="number" id="age" min="18" max="100" value="55" step="1">
+        <span class="unit">years</span>
+      </div>
+      <div class="field">
+        <label for="sex">Sex</label>
+        <select id="sex">
+          <option value="0">Female (reference)</option>
+          <option value="1">Male</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bmi">BMI</label>
+        <input type="number" id="bmi" min="15" max="60" value="26" step="0.1">
+        <span class="unit">kg/m²</span>
+      </div>
+    </div>
+
+    <div class="field-group-label">Stone characteristics</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="location">Stone location</label>
+        <select id="location">
+          <option value="0">Kidney (reference)</option>
+          <option value="1">Ureter</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="stone_size">Maximum stone dimension</label>
+        <input type="number" id="stone_size" min="1" max="30" value="8" step="0.5">
+        <span class="unit">mm</span>
+      </div>
+      <div class="field">
+        <label for="ct_density">CT attenuation</label>
+        <input type="number" id="ct_density" min="100" max="1800" value="800" step="10">
+        <span class="unit">Hounsfield units (HU)</span>
+      </div>
+      <div class="field">
+        <label for="skin_stone">Skin-to-stone distance</label>
+        <input type="number" id="skin_stone" min="1" max="30" value="11" step="0.1">
+        <span class="unit">cm</span>
+      </div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-top">
+        <div class="result-prob-group">
+          <div class="result-prob-label">P(ESWL success)</div>
+          <div class="result-prob" id="prob-display">—</div>
+        </div>
+        <div class="result-right">
+          <div class="result-interp-label">Interpretation</div>
+          <div class="result-interp" id="interp-text">—</div>
+          <div class="result-logodds">Log-odds: <span id="logodds-display">—</span></div>
+        </div>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="prob-bar" style="width:0%"></div></div>
+      <div class="result-meta">Logistic regression · n=343 · C=0.693 (1000-bootstrap corrected) · calibration MAE=0.023</div>
+    </div>
+
+  </div>
+
+  <div class="methods">
+    <h2>Model details</h2>
+    <p>
+      A multivariable logistic regression model was fitted to predict successful stone fragmentation (defined as absence of clinically significant residual fragments) following ESWL. The model was developed on 343 consecutive procedures and internally validated using 1000-iteration bootstrap resampling.
+    </p>
+    <p>
+      Linearity of continuous predictors was confirmed using restricted cubic spline testing (ANOVA-based, total nonlinear p=0.78). No spline transformations were required.
+    </p>
+    <table class="coef-table">
+      <thead>
+        <tr>
+          <th>Predictor</th>
+          <th>Coefficient (β)</th>
+          <th>OR</th>
+          <th>p-value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Intercept</td><td>3.080</td><td>—</td><td>0.001</td></tr>
+        <tr><td>Age (per year)</td><td>−0.008</td><td>0.99</td><td>0.345</td></tr>
+        <tr><td>Sex (male vs female)</td><td>+0.007</td><td>1.01</td><td>0.979</td></tr>
+        <tr><td>BMI (per kg/m²)</td><td>−0.010</td><td>0.99</td><td>0.740</td></tr>
+        <tr><td class="sig">Location (ureter vs kidney)</td><td class="sig">+0.729</td><td class="sig">2.07</td><td class="sig">0.008</td></tr>
+        <tr><td>Stone size (per mm)</td><td>−0.104</td><td>0.90</td><td>0.053</td></tr>
+        <tr><td class="sig">CT attenuation (per 10 HU)</td><td class="sig">−0.200</td><td class="sig">0.82</td><td class="sig">&lt;0.001</td></tr>
+        <tr><td>Skin-stone distance (per cm)</td><td>−0.051</td><td>0.95</td><td>0.474</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="disclaimer-card">
+    <strong>Important notice.</strong> This calculator is intended for research and educational purposes only. It has undergone internal validation only and has not been externally validated in independent cohorts. Predicted probabilities should not be used to guide individual clinical decisions. Always apply clinical judgement and consult current guidelines. The authors accept no responsibility for clinical decisions made on the basis of this tool.
+  </div>
+
+</div>
+
+<footer>
+  ESWL success calculator · internal validation only · not for clinical use
+</footer>
+
+<script>
+  const INTERCEPT = 3.0799;
+  const COEF = {
+    age:        -0.0076,
+    sex_male:    0.0074,
+    bmi:        -0.0104,
+    loc_ureter:  0.7293,
+    stone_size: -0.1043,
+    ct_density: -0.0200,
+    skin_stone: -0.0513
+  };
+
+  function plogis(x) { return 1 / (1 + Math.exp(-x)); }
+
+  function calculate() {
+    const age      = parseFloat(document.getElementById('age').value)       || 0;
+    const sex      = parseFloat(document.getElementById('sex').value);
+    const bmi      = parseFloat(document.getElementById('bmi').value)       || 0;
+    const location = parseFloat(document.getElementById('location').value);
+    const stone    = parseFloat(document.getElementById('stone_size').value) || 0;
+    const ctRaw    = parseFloat(document.getElementById('ct_density').value) || 0;
+    const skin     = parseFloat(document.getElementById('skin_stone').value) || 0;
+    const ct       = ctRaw / 10;
+
+    const logodds = INTERCEPT
+      + COEF.age        * age
+      + COEF.sex_male   * sex
+      + COEF.bmi        * bmi
+      + COEF.loc_ureter * location
+      + COEF.stone_size * stone
+      + COEF.ct_density * ct
+      + COEF.skin_stone * skin;
+
+    const prob = plogis(logodds);
+    const pct  = (prob * 100).toFixed(1);
+
+    document.getElementById('prob-display').textContent = pct + '%';
+    document.getElementById('prob-bar').style.width = pct + '%';
+    document.getElementById('logodds-display').textContent = logodds.toFixed(3);
+
+    let label;
+    if      (prob < 0.30) label = 'Low likelihood of success';
+    else if (prob < 0.50) label = 'Below average likelihood';
+    else if (prob < 0.65) label = 'Moderate likelihood';
+    else if (prob < 0.75) label = 'Above average likelihood';
+    else                  label = 'High likelihood of success';
+
+    document.getElementById('interp-text').textContent = label;
+  }
+
+  ['age','sex','bmi','location','stone_size','ct_density','skin_stone'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calculate);
+  });
+
+  calculate();
+</script>
+</body>
+</html>
